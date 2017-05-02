@@ -35,9 +35,9 @@ typedef enum IG_Datatype {
 
 // IG Data
 typedef struct IG_Data{
-	IG_ID id;
-	IG_Datatype datatype;
-	void * data;
-	IG_DateTime timestamp;
+	IG_ID id,
+	IG_Datatype datatype,
+	void * data,
+	IG_DateTime timestamp
 } IG_Data;
 
