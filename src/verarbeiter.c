@@ -37,7 +37,7 @@ void* IG_WorkLoop(void * argument){
 	Verarbeiter * verarbeiter = args->verarbeiter;
 	IG_Int32 ruleSetSize = args->ruleSetSize;
 	// Array of RuleSets
-	IG_Input_RuleSet * ruleSet = args->RuleSetSize:
+	IG_Input_RuleSet * ruleSetArray = args->ruleSetArray:
 	
 	IG_Queue * queueErfasser = verarbeiter->erfasser->queue;
 	IG_Queue * queueSender = verarbeiter->sender->queue;
@@ -55,9 +55,9 @@ void* IG_WorkLoop(void * argument){
 
 		// If there is data apply all rules
 		if(data!=NULL)
-			IG_Verarbeiter_applyRules(data,ruleSet, ruleSetSize);
+			IG_Verarbeiter_applyRules(data,ruleSetArray, ruleSetSize);
 
-		IG_Verarbeiter_checkIntervals(ruleSet, ruleSetSize, queueSender);
+		IG_Verarbeiter_checkIntervals(ruleSetArray, ruleSetSize, queueSender);
 		// TODO: Maybe add some functions to create logs/print status
 	}
 }
@@ -67,7 +67,7 @@ void IG_Verarbeiter_applyRules(IG_Data * data,IG_Input_RuleSet * ruleSetArray, I
 	for(IG_Int32 i = 0; i < ruleSetSize; i++){
 		if(ruleSetArray[i].inputId = data->id){
 			// Apply entire RuleSet on data
-			IG_Verarbeiter_applyRule(data, rules[i]);
+			IG_Verarbeiter_applyRule(data, ruleSetArray[i]);
 			break;
 		}				
 	}
@@ -76,7 +76,7 @@ void IG_Verarbeiter_applyRules(IG_Data * data,IG_Input_RuleSet * ruleSetArray, I
 
 void IG_Verarbeiter_applyRule(IG_Data * data, IG_Input_RuleSet* ruleSet){
 	// Call all rule functions and invoke the data and the rule specific data
-	for(IG_Int32 i = 0; i < (ruleSet->Size);i++){
+	for(IG_Int32 i = 0; i < (ruleSet->ruleSize);i++){
 		(*(ruleSet->rules[i].function))(data, ruleSet->rules[i].data);
 	}
 }
@@ -90,7 +90,7 @@ void IG_Verarbeiter_checkIntervals(IG_Input_RuleSet * ruleSetArray, IG_Int32 rul
 			if(ruleSet->rules[i].deadline < now){
 				IG_Rule * rule = &(ruleSet->rules[i]);
 				IG_Data * dataToSend = encodeToJSON(rule);
-				IG_Queue_put(queue);
+				IG_Queue_put(queue, dataToSend);
 				rule->deadline = IG_DateTime_add(rule->deadline,rule->interval);
 			}	
 		}							
