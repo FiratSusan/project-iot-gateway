@@ -15,28 +15,30 @@ void IG_Verarbeiter_delete(IG_Verarbeiter * verarbeiter) {
 }
 
 IG_Status init_verarbeiter(IG_Verarbeiter * verarbeiter){
-	//Insert magic here for config where rules sets are created
-	
-	//Output of magic is an array of IG_Input_RuleSet	
-	IG_INT32 size= 0;
-	IG_Input_RuleSet ruleSets[size]= NULL;
-	
-	// TODO: Malloc so its on the heap
-	IG_WorkLoopArgs args = (workLoopArgs){verarbeiter, ruleSets, size};
-	pthread_t thread;	
+	IG_ConfigResponse res;
+	IG_Status rt = IG_Config_Verarbeiter_get_RuleSets(conf,&res);
+     	IG_WorkLoopArgs* args = (IG_WorkLoopArgs*)malloc(sizeof(IG_WorkLoopArgs));
+	args->verarbeiter = verarbeiter;
+	args->ruleSetSize = res.responseAmount;
+	args->ruleSetArray = (IG_Input_RuleSet *) res.data;
 
-	pthread_create(&thread,NULL,IG_WorkLoop,(void*)&args)
+	//Assign function pointers
+	IG_Verarbeiter_initFunktionen(args->ruleSetArray, args->ruleSetSize);
+	
+	pthread_t* thread = (pthread_t*)malloc(sizeof(pthread_t));
+	
+	pthread_create(thread,NULL,IG_WorkLoop,(void*)&args);
 
-	return IG_GOOD;
+	return IG_STATUS_GOOD;
 }
 
 void* IG_WorkLoop(void * argument){
 	// Parse argmuents
-	IG_WorkLoopArgs args = (IG_WorkLoopArgs *)argument;
-	Verarbeiter * verarbeiter = args->verarbeiter;
-	IG_Int32 ruleSetSize = args->ruleSetSize;
+	IG_WorkLoopArgs args = *(IG_WorkLoopArgs *)argument;
+	IG_Verarbeiter * verarbeiter = args.verarbeiter;
+	IG_UInt32 ruleSetSize = args.ruleSetSize;
 	// Array of RuleSets
-	IG_Input_RuleSet * ruleSetArray = args->ruleSetArray:
+	IG_Input_RuleSet * ruleSetArray = args.ruleSetArray;
 	
 	IG_Queue * queueErfasser = verarbeiter->erfasser->queue;
 	IG_Queue * queueSender = verarbeiter->sender->queue;
@@ -63,10 +65,10 @@ void* IG_WorkLoop(void * argument){
 
 void IG_Verarbeiter_applyRules(IG_Data * data,IG_Input_RuleSet * ruleSetArray, IG_Int32 ruleSetSize){
 	// Find the correct RuleSet
-	for(IG_Int32 i = 0; i < ruleSetSize; i++){
+	for(IG_UInt32 i = 0; i < ruleSetSize; i++){
 		if(ruleSetArray[i].inputId = data->id){
 			// Apply entire RuleSet on data
-			IG_Verarbeiter_applyRule(data, ruleSetArray[i]);
+			IG_Verarbeiter_applyRule(data, &ruleSetArray[i]);
 			break;
 		}				
 	}
@@ -75,27 +77,95 @@ void IG_Verarbeiter_applyRules(IG_Data * data,IG_Input_RuleSet * ruleSetArray, I
 
 void IG_Verarbeiter_applyRule(IG_Data * data, IG_Input_RuleSet* ruleSet){
 	// Call all rule functions and invoke the data and the rule specific data
-	for(IG_Int32 i = 0; i < (ruleSet->ruleSize);i++){
-		(*(ruleSet->rules[i].function))(data, ruleSet->rules[i].data);
+	for(IG_UInt32 i = 0; i < (ruleSet->ruleSize);i++){
+		(*(ruleSet->rules[i].function))(data, &ruleSet->rules[i]);
 	}
 }
 
 void IG_Verarbeiter_checkIntervals(IG_Input_RuleSet * ruleSetArray, IG_Int32 ruleSetSize, IG_Queue * queue){
 	// Go through every rule and check if to Send
 	IG_DateTime now = IG_DateTime_now();
-	for(IG_Int32 i = 0; i < ruleSetSize; i++){
+	for(IG_UInt32 i = 0; i < ruleSetSize; i++){
 		IG_Input_RuleSet * ruleSet = &(ruleSetArray[i]);
-		for(IG_Int32 i = 0; i < ruleSet->ruleSize; i++){
-			if(ruleSet->rules[i].deadline < now){
+		for(IG_UInt32 j = 0; j < ruleSet->ruleSize; j++){
+			if(ruleSet->rules[j].deadline < now){
 				IG_Data * dataToSend = malloc(sizeof(IG_Data));
-				dataToSend->id = ruleSet->rules[i].outputid;
+				dataToSend->id = ruleSet->rules[j].outputid;
 				dataToSend->datatype = IG_CHAR;
-				dataToSend->data = (void*)IG_Data_toString(ruleSet->rules[i].data);
+				dataToSend->data = (void*)IG_Data_toString(ruleSet->rules[j].data);
 				dataToSend->timestamp = IG_DateTime_now();
 				IG_Queue_put(queue, dataToSend);
-				rule->deadline = IG_DateTime_add(rule->deadline,rule->interval);
+				rule->deadline = IG_DateTime_add_duration(rule->deadline,rule->interval);
 			}	
 		}							
 	}
 }
 
+void IG_Verarbeiter_initFunktionen(IG_Input_RuleSet* ruleSetArray, IG_UInt32 ruleSetSize){
+	for(IG_UInt32 i = 0; i < ruleSetSize; i++){
+		IG_InputRuleSet* ruleSet = &(ruleSetArray[i]);
+		for(IG_UInt32 j = 0; j < ruleSet->ruleSize; j++){
+			IG_Rule* rule = &(ruleSet[j]);)
+			switch(rule->rule){
+				case IG_RULE_TRANSMIT:
+					rule->funcPtr = IG_Transmit;
+					break;
+				case IG_RULE_AVG:
+					rule->funcPtr = IG_Average;
+					break;
+				case IG_RULE_MAX:
+					rule->funcPtr = IG_Maximum;
+					break;
+				case IG_RULE_MIN:
+					rule->funcPtr = IG_Minimum;
+					break;
+			}			
+		}
+	}
+}
+
+void IG_Transmit(IG_Data* data, IG_Rule * rule){
+	rule->data = data;
+}
+void IG_Average(IG_Data* data, IG_Rule * rule){
+	*((int*)rule->data->data
+}
+void IG_Maximum(IG_Data* data, IG_Rule * rule){
+	switch(data->datatype){
+		case IG_FLOAT:
+			IG_Float dataVal1, dataVal2;
+			break;
+		case IG_DOUBLE:
+			IG_Double dataVal1, dataVal2;
+		case IG_INT32:
+			IG_Int32 dataVal1, dataVal2;
+			break;
+		case IG_UINT32:
+			IG_UInt32 dataVal1, dataVal2;
+			break;
+		case IG_INT64:
+			IG_Int64 dataVal1, dataVal2;
+			break;	
+		case IG_UINT64:
+		case IG_Duration:
+		case IG_DateTime:
+			IG_UInt64 dataVal1, dataVal2;
+			break;	
+		case IG_BYTE:
+			IG_Byte dataVal1, dataVal2;
+			break;
+		case IG_CHAR:
+			IG_Char dataVal1, dataVal2;
+			break;
+		case IG_BOOL:
+			IG_Bool dataVal1, dataVal2;
+	}
+
+
+	if(dataVal1 > dataVal2) return;
+	rule->data = data;
+}
+void IG_Minimum(IG_Data* data, IG_Rule * rule){
+	if(*((int*)rule->data->data < *((int*)data->data)) return;
+	rule->data = data;
+}

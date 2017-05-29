@@ -7,22 +7,16 @@
 #include "datenerfasser.h"
 #include <stdio.h>
 
+
+typedef struct __IG_Rule IG_Rule;
 // Function pointer prototype
-void (*IG_funcPtr)(IG_Data *,IG_Rule *);
+typedef void (*IG_funcPtr)(IG_Data * data, IG_Rule * rule);
 
-void IG_avg(IG_Data *,IG_Data *);
-void IG_max(IG_Data *,IG_Data *);
-void IG_min(IG_Data *,IG_Data *);
-void IG_transmit(IG_Data *,IG_Data *);
-
-// Struct for the Verarbeiter
-typedef struct{
-    IG_Config * config;
-    IG_Datenversender * sender;
-    IG_Datenerfasser * erfasser;
-    IG_Bool running;
-} IG_Verarbeiter;
-
+// Prototype functions
+void IG_Transmit(IG_Data* data, IG_Rule * rule);
+void IG_Average(IG_Data* data, IG_Rule * rule);
+void IG_Maximum(IG_Data* data, IG_Rule * rule);
+void IG_Minimum(IG_Data* data, IG_Rule * rule);
 
 // Enumeration for rule types
 typedef enum{
@@ -33,7 +27,7 @@ typedef enum{
 } IG_RuleType;
 
 // Struct for an rule
-typedef struct{
+struct __IG_Rule{
 	IG_RuleType rule;
 	IG_Int32 outputId;
 	IG_funcPtr function;
@@ -41,20 +35,31 @@ typedef struct{
 	IG_DateTime interval;
 	IG_Int32 size;	// Number of Data
 	IG_Data * data;
-} IG_Rule;
+};
+
+// Struct for the Verarbeiter
+typedef struct{
+    IG_Config * config;
+    IG_Datenversender * sender;
+    IG_Datenerfasser * erfasser;
+    IG_Bool running;
+} IG_Verarbeiter;
+
+
+
 
 // Struct for an set of rules
 typedef struct{
 	IG_Int32 inputId;
 	IG_Datatype datatype;
-	IG_Int32 ruleSize; //number of rules in this RuleSet
+	IG_UInt32 ruleSize; //number of rules in this RuleSet
 	IG_Rule * rules;	// pointer to an array of rules	
 } IG_Input_RuleSet;
 
 // Struct to pass agurments to the workLoop
 typedef struct{
 	IG_Verarbeiter * verarbeiter;
-	IG_Int32 ruleSetSize;
+	IG_UInt32 ruleSetSize;
 	IG_Input_RuleSet* ruleSetArray;
 } IG_WorkLoopArgs;
 
@@ -69,13 +74,15 @@ IG_Verarbeiter * IG_Verarbeiter_create(IG_Config * config, IG_Datenversender * s
 void IG_Verarbeiter_delete(IG_Verarbeiter * verarbeiter);
 
 // Function that apply rules on data
-void IG_Verarbeiter_applyRules(IG_Data * data,IG_Input_RuleSet * ruleSetArray, IG_Int32 ruleSetSize);
+void IG_Verarbeiter_applyRules(IG_Data * data,IG_Input_RuleSet * ruleSetArray, IG_UInt32 ruleSetSize);
 void IG_Verarbeiter_applyRule(IG_Data * data,IG_Input_RuleSet * ruleSet);
 
 // Function to check if data has to be send
-void IG_Verarbeiter_checkIntervals(IG_Input_RuleSet * ruleSet, IG_Int32 ruleSetSize, IG_Queue * queue);
+void IG_Verarbeiter_checkIntervals(IG_Input_RuleSet * ruleSet, IG_UInt32 ruleSetSize, IG_Queue * queue);
 
 // Function that proccesses all the data
 void* IG_WorkLoop(void * args);
+
+void IG_Verarbeiter_initFunktionen(IG_Input_RuleSet* ruleSetArray, IG_UInt32 ruleSetSize);
 
 #endif
