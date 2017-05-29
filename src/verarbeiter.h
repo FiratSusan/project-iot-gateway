@@ -5,6 +5,7 @@
 #include "internals.h"
 #include "datenversender.h"
 #include "datenerfasser.h"
+#include <stdio.h>
 
 // Function pointer prototype
 void (*IG_funcPtr)(IG_Data *,IG_Rule *);
@@ -73,9 +74,6 @@ void IG_Verarbeiter_applyRule(IG_Data * data,IG_Input_RuleSet * ruleSet);
 
 // Function to check if data has to be send
 void IG_Verarbeiter_checkIntervals(IG_Input_RuleSet * ruleSet, IG_Int32 ruleSetSize, IG_Queue * queue);
-
-// Encodes data into JSON format
-IG_Data * encodeToJSON(IG_Rule *);
 
 // Function that proccesses all the data
 void* IG_WorkLoop(void * args);

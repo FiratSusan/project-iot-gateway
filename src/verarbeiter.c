@@ -1,6 +1,5 @@
 #include "verarbeiter.h"
 
-
 IG_Verarbeiter * IG_Verarbeiter_create(IG_Config * config, IG_Datenversender * sender, IG_Datenerfasser * erfasser){
     //create new on the heap
     IG_Verarbeiter * arbeiter = (IG_Verarbeiter *) malloc(sizeof(IG_Verarbeiter));
@@ -88,17 +87,15 @@ void IG_Verarbeiter_checkIntervals(IG_Input_RuleSet * ruleSetArray, IG_Int32 rul
 		IG_Input_RuleSet * ruleSet = &(ruleSetArray[i]);
 		for(IG_Int32 i = 0; i < ruleSet->ruleSize; i++){
 			if(ruleSet->rules[i].deadline < now){
-				IG_Rule * rule = &(ruleSet->rules[i]);
-				IG_Data * dataToSend = encodeToJSON(rule);
+				IG_Data * dataToSend = malloc(sizeof(IG_Data));
+				dataToSend->id = ruleSet->rules[i].outputid;
+				dataToSend->datatype = IG_CHAR;
+				dataToSend->data = (void*)IG_Data_toString(ruleSet->rules[i].data);
+				dataToSend->timestamp = IG_DateTime_now();
 				IG_Queue_put(queue, dataToSend);
 				rule->deadline = IG_DateTime_add(rule->deadline,rule->interval);
 			}	
 		}							
 	}
-}
-
-// TODO:
-IG_Data * encodeToJSON(IG_Rule * rule){
-	return NULL
 }
 
