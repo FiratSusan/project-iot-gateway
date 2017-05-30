@@ -5,7 +5,7 @@
 #include "internals.h"
 #include "datenversender.h"
 #include "datenerfasser.h"
-#include <stdio.h>
+#include "config_verarbeiter.h"
 
 
 typedef struct __IG_Rule IG_Rule;
@@ -33,7 +33,7 @@ struct __IG_Rule{
 	IG_funcPtr function;
 	IG_DateTime deadline;
 	IG_DateTime interval;
-	IG_Int32 size;	// Number of Data
+	IG_UInt32 size;	// Number of Data
 	IG_Data * data;
 };
 

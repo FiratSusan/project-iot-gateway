@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 //TYPEDEFS AND CONSTANTS
 
@@ -77,7 +78,8 @@ typedef enum {
     IG_UINT64,
     IG_DATETIME,
     IG_DURATION,
-    IG_BOOL
+    IG_BOOL,
+    IG_CHAR
     /*...*/
 } IG_Datatype;
 
