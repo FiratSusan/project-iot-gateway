@@ -5,9 +5,12 @@ ${PROJECT_SOURCE_DIR}/src/verarbeiter.c
 ${PROJECT_SOURCE_DIR}/src/internals.c 
 ${PROJECT_SOURCE_DIR}/src/queue.c 
 ${PROJECT_SOURCE_DIR}/src/datenversender.c 
-${PROJECT_SOURCE_DIR}/src/datenerfasser.c
+${PROJECT_SOURCE_DIR}/src/datenerfasser.c 
 ${PROJECT_SOURCE_DIR}/src/opc.c 
-${PROJECT_SOURCE_DIR}/src/config_opc.c
+${PROJECT_SOURCE_DIR}/src/mqtt.c 
+${PROJECT_SOURCE_DIR}/src/config_opc.c 
+${PROJECT_SOURCE_DIR}/src/config_mqtt.c 
+${PROJECT_SOURCE_DIR}/src/config_verarbeiter.c 
 ${PROJECT_SOURCE_DIR}/src/configuration.c)
 
 TARGET_LINK_LIBRARIES(VerarbeiterTest1 xml2 pthread paho-mqtt3a open62541)
