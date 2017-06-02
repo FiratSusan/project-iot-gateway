@@ -30,36 +30,36 @@ IG_Char * IG_Data_toString(IG_Data* data){
 	switch(data->datatype){
 		case IG_DOUBLE:
 		case IG_FLOAT:
-			snprintf(value, BUFFSIZE, "{value:%f}", *((float*)dataToEncode));
+			snprintf(value, BUFFSIZE, "%f", *((IG_Float*)dataToEncode));
 			break;
 		case IG_INT32:
-			snprintf(value, BUFFSIZE, "{value:%i}", *((int*)dataToEncode));
+			snprintf(value, BUFFSIZE, "%i", *((IG_Int32*)dataToEncode));
 			break;
 		case IG_UINT32:
-			snprintf(value, BUFFSIZE, "{value:%u}", *((unsigned int*)dataToEncode));
+			snprintf(value, BUFFSIZE, "%u", *((IG_UInt32*)dataToEncode));
 			break;
 		case IG_INT64:
-			snprintf(value, BUFFSIZE, "{value:%ld}",*((long int*)dataToEncode));
+			snprintf(value, BUFFSIZE, "%ld",*((IG_Int64*)dataToEncode));
 			break;
 		case IG_UINT64:
 		case IG_DATETIME:
 		case IG_DURATION:
-			snprintf(value, BUFFSIZE, "{value:%lu}",*((long unsigned int*)dataToEncode));
+			snprintf(value, BUFFSIZE, "%lu",*((IG_UInt64*)dataToEncode));
 			break;
 		case IG_BYTE:
-			snprintf(value, BUFFSIZE, "{value:%hu}",*((unsigned short int*)dataToEncode));
+			snprintf(value, BUFFSIZE, "%hu",*((IG_Byte*)dataToEncode));
 			break;
 		case IG_BOOL:
-			snprintf(value, BUFFSIZE, "{value:%s}", *((bool*)dataToEncode)?"TRUE":"FALSE");
+			snprintf(value, BUFFSIZE, "%s", *((IG_Bool*)dataToEncode)?"TRUE":"FALSE");
 			break;
 		case IG_CHAR:
-			snprintf(value, BUFFSIZE, "{value:%hhu}",*((unsigned char*)dataToEncode));
+			snprintf(value, BUFFSIZE, "%hhu",*((IG_Char*)dataToEncode));
 			break;
 		case IG_NULL:
-			snprintf(value, BUFFSIZE, "{value:NULL}");
+			snprintf(value, BUFFSIZE, "NULL");
 			break;
 		default:
-			// Maybe add a log here to inform there was a failure
+			snprintf(value, BUFFSIZE, "ERROR");
 			break;
 	}
 	return value;

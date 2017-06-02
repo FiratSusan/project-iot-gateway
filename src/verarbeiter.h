@@ -85,4 +85,6 @@ void* IG_WorkLoop(void * args);
 
 void IG_Verarbeiter_initFunktionen(IG_Input_RuleSet* ruleSetArray, IG_UInt32 ruleSetSize);
 
+IG_Data* IG_Verarbeiter_encodeToJSON(IG_Data* data);
+
 #endif

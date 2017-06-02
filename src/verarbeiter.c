@@ -11,6 +11,7 @@ IG_Verarbeiter * IG_Verarbeiter_create(IG_Config * config, IG_Datenversender * s
 
 
 void IG_Verarbeiter_delete(IG_Verarbeiter * verarbeiter) {
+    //TODO deletes vom sender und erfasser aufrufen evtl.
     free(verarbeiter);
 }
 
@@ -25,6 +26,8 @@ IG_Status IG_Verarbeiter_init(IG_Verarbeiter * verarbeiter){
 
 	//Assign function pointers
 	IG_Verarbeiter_initFunktionen(args->ruleSetArray, args->ruleSetSize);
+
+	verarbeiter->running = true;
 	
 	pthread_t* thread = (pthread_t*)malloc(sizeof(pthread_t));
 	
@@ -35,7 +38,7 @@ IG_Status IG_Verarbeiter_init(IG_Verarbeiter * verarbeiter){
 
 void* IG_WorkLoop(void * argument){
 	// Parse argmuents
-	IG_WorkLoopArgs args = *(IG_WorkLoopArgs *)argument;
+	IG_WorkLoopArgs args = *((IG_WorkLoopArgs *)argument);
 	IG_Verarbeiter * verarbeiter = args.verarbeiter;
 	IG_UInt32 ruleSetSize = args.ruleSetSize;
 	// Array of RuleSets
@@ -98,7 +101,7 @@ void IG_Verarbeiter_checkIntervals(IG_Input_RuleSet * ruleSetArray, IG_UInt32 ru
 				IG_Data * dataToSend = malloc(sizeof(IG_Data));
 				dataToSend->id = rule.outputId;
 				dataToSend->datatype = IG_CHAR;
-				dataToSend->data = (void*)IG_Data_toString(rule.data);
+				dataToSend->data = (void*)IG_Verarbeiter_encodeToJSON(rule.data);
 				dataToSend->timestamp = IG_DateTime_now();
 				IG_Queue_put(queue, dataToSend);
 				rule.deadline = IG_DateTime_add_duration(rule.deadline,rule.interval);
@@ -128,6 +131,10 @@ void IG_Verarbeiter_initFunktionen(IG_Input_RuleSet* ruleSetArray, IG_UInt32 rul
 			}			
 		}
 	}
+}
+
+IG_Char* IG_Verarbeiter_encodeToJSON(IG_Data* data){
+	return (IG_Char*)"{value:"+IG_Data_toString(data)+"}";
 }
 
 void IG_Transmit(IG_Data* data, IG_Rule * rule){
