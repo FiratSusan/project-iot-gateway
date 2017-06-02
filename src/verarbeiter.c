@@ -134,7 +134,11 @@ void IG_Verarbeiter_initFunktionen(IG_Input_RuleSet* ruleSetArray, IG_UInt32 rul
 }
 
 IG_Char* IG_Verarbeiter_encodeToJSON(IG_Data* data){
-	return (IG_Char*)"{value:"+IG_Data_toString(data)+"}";
+	char* s;
+	strcat(s,"{value:");
+	strcat(s,(char*)IG_Data_toString(data));
+	strcat(s,"}");
+	return (IG_Char*)s;
 }
 
 void IG_Transmit(IG_Data* data, IG_Rule * rule){
