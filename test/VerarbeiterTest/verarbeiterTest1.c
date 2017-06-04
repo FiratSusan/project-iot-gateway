@@ -5,18 +5,25 @@
 int main(int argc, char* argv[]){
 	
 	srand(time(NULL));
+	
 
 	// Setup config
-	IG_Config* config = IG_Config_create(argv[1], IG_CONFIG_STANDARD);
-
+	printf("Initiating config\n");	
+	IG_Config* configVerarbeiter = IG_Config_create(argv[1], IG_CONFIG_VERARBEITER);
+	IG_Config* configErfasser = IG_Config_create(argv[2], IG_CONFIG_OPC);
+	IG_Config* configSender = IG_Config_create(argv[3], IG_CONFIG_MQTT);
 
 	// Setup versender
-	IG_Datenversender * sender = IG_Datenversender_create(config);
+	printf("Initiating sender\n");
+	IG_Datenversender * sender = IG_Datenversender_create(configSender);
 
 	// Setup erfasser and fill its queue with Data
-	IG_Datenerfasser * erfasser = IG_Datenerfasser_create_nonBlocking(config);
+	printf("Initiating erfasser\n");
+	IG_Datenerfasser * erfasser = IG_Datenerfasser_create_nonBlocking(configErfasser);
 
+	printf("Creating Data\n");
 	for(int i = 0; i<100; ++i){
+		printf("Data %d \n", i);
 
 		IG_Data* data = (IG_Data*)malloc(sizeof(IG_Data));
 		if(data==NULL) return EXIT_FAILURE;		
@@ -34,15 +41,19 @@ int main(int argc, char* argv[]){
 		IG_Queue_put(erfasser->queue,data);
 	}
 
-	IG_Verarbeiter* verarbeiter = IG_Verarbeiter_create(config, sender, erfasser);
+	printf("Creating verarbeiter\n");
+	IG_Verarbeiter* verarbeiter = IG_Verarbeiter_create(configVerarbeiter, sender, erfasser);
 
+	printf("Initiating verarbeiter\n");
 	IG_Verarbeiter_init(verarbeiter);
 
 	// After starting the verarbeiter we just wait and watch the output
+	printf("Starting loop\n");
 	while(1){
+		if(IG_Queue_isEmpty(sender->queue)) continue;
 		IG_Data* data = IG_Queue_take(sender->queue);
-		if(data==NULL) continue;
 		printf("Recieved JSON String: %s for OutID: %d \n", (IG_Char*)data->data, data->id);
+		sleep(2);
 	}
 	
 
