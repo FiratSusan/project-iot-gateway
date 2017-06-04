@@ -13,4 +13,4 @@ ${PROJECT_SOURCE_DIR}/src/config_mqtt.c
 ${PROJECT_SOURCE_DIR}/src/config_verarbeiter.c 
 ${PROJECT_SOURCE_DIR}/src/configuration.c)
 
-TARGET_LINK_LIBRARIES(VerarbeiterTest1 xml2 pthread paho-mqtt3a open62541)
+TARGET_LINK_LIBRARIES(VerarbeiterTest1 xml2 pthread paho-mqtt3c open62541)
