@@ -17,12 +17,9 @@ void IG_Verarbeiter_delete(IG_Verarbeiter * verarbeiter) {
 
 IG_Status IG_Verarbeiter_init(IG_Verarbeiter * verarbeiter){
 
-	printf("Trying to get config\n");
-
 	IG_ConfigResponse res;
 	IG_Status rt = IG_Config_Verarbeiter_get_RuleSets(verarbeiter->config,&res);
 	if(rt != IG_STATUS_GOOD) {
-            	printf("Something went wrong with getting rulesSets\n");
 		return rt;
        	}
 
@@ -36,7 +33,6 @@ IG_Status IG_Verarbeiter_init(IG_Verarbeiter * verarbeiter){
         	IG_ConfigResponse res_rules;
         	rt = IG_Config_Verarbeiter_get_Rules(verarbeiter->config, &res_rules, args->ruleSetArray[i].inputId);
         	if(rt != IG_STATUS_GOOD) {
-            		printf("Something went wrong with getting rulesSets\n");
 			return rt;
        		}
 
@@ -44,14 +40,11 @@ IG_Status IG_Verarbeiter_init(IG_Verarbeiter * verarbeiter){
         	args->ruleSetArray[i].rules = (IG_Rule *) res_rules.data;
     	}
 
-	printf("Initiating functions\n");
 	//Assign function pointers
 	IG_Verarbeiter_initFunktionen(args->ruleSetArray, args->ruleSetSize);
 
-	printf("Set var running to true\n");
 	verarbeiter->running = true;
 
-	printf("Starting thread\n");	
 	pthread_t* thread = (pthread_t*)malloc(sizeof(pthread_t));
 	
 	pthread_create(thread,NULL,IG_WorkLoop,(void*)args);
@@ -61,17 +54,13 @@ IG_Status IG_Verarbeiter_init(IG_Verarbeiter * verarbeiter){
 
 void* IG_WorkLoop(void * argument){
 
-	printf("Parsing arguments for Thread%p\n", argument);
 	// Parse argmuents
 	IG_WorkLoopArgs* args = (IG_WorkLoopArgs *)argument;
-printf("Parsing arguments for verarbeier\n");
 	IG_Verarbeiter * verarbeiter = args->verarbeiter;
-printf("Parsing arguments for size\n");
 	IG_UInt32 ruleSetSize = args->ruleSetSize;
 	// Array of RuleSets
-printf("Parsing arguments for array\n");
 	IG_Input_RuleSet * ruleSetArray = args->ruleSetArray;
-	
+
 	IG_Queue * queueErfasser = verarbeiter->erfasser->queue;
 	IG_Queue * queueSender = verarbeiter->sender->queue;
 
@@ -98,13 +87,13 @@ printf("Parsing arguments for array\n");
 	}
 }
 
-void IG_Verarbeiter_applyRules(IG_Data * data,IG_Input_RuleSet * ruleSetArray, IG_UInt32 ruleSetSize){
+void IG_Verarbeiter_applyRules(IG_Data * data, IG_Input_RuleSet * ruleSetArray, IG_UInt32 ruleSetSize){
 	printf("Applying all rules\n");
 	// Find the correct RuleSet
 	for(IG_UInt32 i = 0; i < ruleSetSize; i++){
 		if(ruleSetArray[i].inputId = data->id){
 			// Apply entire RuleSet on data
-			printf("Found ruleSet for id %d\n at set %p", i, ruleSetArray);
+			printf("Found ruleSet for id %d\n", data->id);
 			IG_Verarbeiter_applyRule(data, &(ruleSetArray[i]));
 			break;
 		}				
