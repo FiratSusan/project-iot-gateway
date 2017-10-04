@@ -2,14 +2,17 @@
 // argument parsing
 // calling run(...)
 
-#include<stdio.h>
-#include<string.h>
+#include <stdio.h>
+#include <string.h>
+#include <pthread.h>
+
+
+#include "starter.h"
 
 //TODO: documentation about arguments
 
 #define USAGE "USAGE: \nIoTGateway -f [config-file]\n"
 
-#include "starter.h"
 
 int main(int argc, char * argv[]) {
 
@@ -20,18 +23,19 @@ int main(int argc, char * argv[]) {
         return -1;
     }
     char * config_filename; 
-    if(!strcmp("-f",argv[0])){
+    if(strcmp("-f",argv[1])){
         printf(USAGE);
         return -1;
     } else {
-        config_filename = argv[1];
+        config_filename = argv[2];
     }
 
+   
     // call run with parameters
     run(config_filename);
 
     // shutdown notice
-    
+
 }
 
 
